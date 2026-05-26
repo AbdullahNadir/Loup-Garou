@@ -7,15 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --surface2: #1a1a26;
-    --border: #2a2a3e;
-    --accent: #c9a84c;
-    --accent2: #e8c87a;
+    --bg: #ffffff;
+    --surface: #dfdfdf;
+    --surface2: #f4e9e9;
+    --border: #000000;
+    --accent: #e30000;
+    --accent2: #e87a7a;
     --danger: #c94c4c;
     --success: #4ca87a;
-    --text: #e8e0d0;
+    --text: #000000;
     --text-muted: #7a7090;
     --purple: #7c5cbf;
     --purple-light: #a07ee0;
@@ -606,7 +606,7 @@
       <div class="section">
         <div class="section-label">اضافة اللاعبين</div>
         <div class="input-row">
-          <input class="text-input" id="player-input" placeholder="Player name…" maxlength="30"
+          <input class="text-input" id="player-input" placeholder="اسم اللاعب..." maxlength="30"
             onkeydown="if(event.key==='Enter')addPlayer()">
           <button class="icon-btn success" onclick="addPlayer()">＋</button>
         </div>
@@ -623,7 +623,7 @@
         <div class="section-label">اضافة الادوار</div>
         <div class="role-add-row">
           <input class="emoji-input" id="role-emoji-input" placeholder="🎭" maxlength="2">
-          <input class="text-input" id="role-name-input" placeholder="Role name…" maxlength="30"
+          <input class="text-input" id="role-name-input" placeholder="اسم الدور..." maxlength="30"
             onkeydown="if(event.key==='Enter')addRole()">
           <button class="icon-btn success" onclick="addRole()">＋</button>
         </div>
@@ -638,16 +638,16 @@
   <!-- Summary + Start -->
   <div class="summary-bar">
     <div>
-      <div class="section-label" style="margin:0 0 2px">Players</div>
+      <div class="section-label" style="margin:0 0 2px">اللاعبون</div>
       <span class="val" id="sum-players">0</span>
     </div>
     <div style="text-align:center">
-      <div class="section-label" style="margin:0 0 2px">Role Slots</div>
+      <div class="section-label" style="margin:0 0 2px">الادوار</div>
       <span class="val" id="sum-slots">0</span>
       <span id="sum-warn" style="display:none;font-size:11px;color:var(--danger);display:block">⚠️ mismatch</span>
     </div>
     <div style="text-align:right">
-      <div class="section-label" style="margin:0 0 2px">Roles</div>
+      <div class="section-label" style="margin:0 0 2px">عدد الادوار</div>
       <span class="val" id="sum-roles">0</span>
     </div>
   </div>
@@ -874,7 +874,7 @@ function updateSummary() {
   const warn = document.getElementById('sum-warn');
   if (totalSlots !== n && n > 0 && state.roles.length > 0) {
     warn.style.display = 'block';
-    warn.textContent = totalSlots > n ? `⚠️ ${totalSlots - n} slots extra` : `⚠️ ${n - totalSlots} players unassigned`;
+    warn.textContent = totalSlots > n ? `⚠️ ${totalSlots - n} slots extra` : `⚠️ ${n - totalSlots} لاعب غير مسجل`;
   } else {
     warn.style.display = 'none';
   }
