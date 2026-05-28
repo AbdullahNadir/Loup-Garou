@@ -806,11 +806,11 @@ const ADMIN_PASSWORD = "je passe"; // <-- Change this to your preferred password
 const DEFAULT_ROLES = [
   { id: 'sv',       name: 'SV',         emoji: '🧑‍🌾​', max: 1 },
   { id: 'tabib',    name: 'الطبيب',     emoji: '🩺', max: 1 },
-  { id: 'chawafa',  name: 'الشوافة',   emoji: '🧿​', max: 1 },
-  { id: 'sahara',   name: 'السحارة',   emoji: '🪄', max: 1 },
+  { id: 'chawafa',  name: 'الشوافة',    emoji: '🧿​', max: 1 },
+  { id: 'sahara',   name: 'السحارة',    emoji: '🪄', max: 1 },
   { id: 'dhib',     name: 'ذيب',        emoji: '🐺', max: 1 },
-  { id: 'corbeau',  name: 'كوربو',    emoji: '🦅', max: 1 },
-  { id: 'bouquet',  name: 'بومة',    emoji: '🦉​', max: 1 },
+  { id: 'corbeau',  name: 'كوربو',      emoji: '🦅', max: 1 },
+  { id: 'bouquet',  name: 'بومة',       emoji: '🦉​', max: 1 },
   { id: 'magnifique',name:'مانيفيك', emoji: '🎭​', max: 1 },
 ];
 
@@ -1065,11 +1065,10 @@ function startDistribution() {
     }
   });
 
-  // Shuffle players globally to keep screening order unpredictable
-  distPlayers = [...state.players].sort(() => Math.random() - 0.5);
+  distPlayers = [...state.players];
   distAssigned = [];
 
-  // Track if any forced role configuration can no longer be sourced from our pool
+  // Track players who get their roles assigned via Phase 1
   let processedPlayers = [];
 
   // PHASE 1: Process Force-Assigned (Admin Manipulated) Roles First
@@ -1077,10 +1076,8 @@ function startDistribution() {
     const forcedRoleName = state.forcedRoles ? state.forcedRoles[player] : undefined;
     
     if (forcedRoleName) {
-      // Find matching item in pool
       let matchPoolIdx = pool.findIndex(r => r.name === forcedRoleName);
       if (matchPoolIdx !== -1) {
-        // Extract assignment
         let assignedRole = pool.splice(matchPoolIdx, 1)[0];
         distAssigned.push({ player, role: assignedRole });
         processedPlayers.push(player);
@@ -1088,23 +1085,19 @@ function startDistribution() {
     }
   });
 
-  // === RANDOMIZE ROLE POOL ===
-  // Shuffle the remaining role pool using Fisher-Yates so they aren't assigned in fixed order
+  // Shuffle remaining roles before handling Phase 2
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  // PHASE 2: Handle remaining unassigned players with smart historical context
+  // PHASE 2: Handle remaining unassigned players
   distPlayers.forEach(player => {
-    if (processedPlayers.includes(player)) return; // Skip players already assigned in phase 1
+    if (processedPlayers.includes(player)) return; 
 
     const lastRoleName = state.history ? state.history[player] : undefined;
-    
-    // Attempt to match a role that isn't their last back-to-back role from the randomized pool
     let targetIdx = pool.findIndex(r => r.name !== lastRoleName);
     
-    // Smart Fallback mechanism if no unique roles remain
     if (targetIdx === -1 && pool.length > 0) {
       targetIdx = 0; 
     }
@@ -1119,7 +1112,16 @@ function startDistribution() {
     distAssigned.push({ player, role: assignedRole });
   });
 
-  // Clear forced roles after a single execution run so it doesn't repeat forever unless re-set
+  // === FIX CRITICAL LOOKUP PATTERN ===
+  // Shuffle the final results using the Fisher-Yates method.
+  // This completely scrambles the reveal cards order so your manual selections 
+  // don't systematically appear at the very beginning of the turn list.
+  for (let i = distAssigned.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [distAssigned[i], distAssigned[j]] = [distAssigned[j], distAssigned[i]];
+  }
+
+  // Clear forced roles after a single execution run
   state.forcedRoles = {};
   saveState();
 
@@ -1129,7 +1131,6 @@ function startDistribution() {
 
 function showNarratorScreen() {
   if (currentIdx >= distAssigned.length) {
-    // Commit current roles to history for tracking the next game run execution
     if (!state.history) state.history = {};
     distAssigned.forEach(entry => {
       if (entry.role.name !== '—') {
