@@ -633,10 +633,171 @@
 </style>
 </head>
 <body>
-  <h1>تلعبو زبي</h1>
-<!--
 
-  -->
+<div id="screen-setup" class="screen active">
+  
+  <!-- Discrete Top-Left Secret Admin Link Button -->
+  <button onclick="checkAdminPassword()" style="
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.25;
+    z-index: 10;
+    padding: 8px;
+  ">.</button>
+
+  <div class="game-header">
+    <div class="game-title">Loup-Garou</div>
+    <span class="ornament">⸻ ✦ ⸻</span>
+    <div class="game-subtitle">NADIR ABDULLAH MOATACEM</div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('players')">👥 اللاعبين</button>
+    <button class="tab-btn" onclick="switchTab('roles')">🎭 الادوار</button>
+  </div>
+
+  <div class="scroll-area">
+    <div id="tab-players">
+      <div class="section">
+        <div class="section-label">اضافة اللاعبين</div>
+        <div class="input-row">
+          <input class="text-input" id="player-input" placeholder="اسم اللاعب..." maxlength="30"
+            onkeydown="if(event.key==='Enter')addPlayer()">
+          <button class="icon-btn success" onclick="addPlayer()">＋</button>
+        </div>
+        <div class="chips" id="players-chips">
+          </div>
+        <div id="players-empty" class="empty-state" style="display:none">لا يوجد لاعبون اضف المزيد ☝️</div>
+      </div>
+    </div>
+
+    <div id="tab-roles" style="display:none">
+      <div class="section">
+        <div class="section-label">اضافة الادوار</div>
+        <div class="role-add-row">
+          <input class="emoji-input" id="role-emoji-input" placeholder="🎭" maxlength="2">
+          <input class="text-input" id="role-name-input" placeholder="اسم الدور..." maxlength="30"
+            onkeydown="if(event.key==='Enter')addRole()">
+          <button class="icon-btn success" onclick="addRole()">＋</button>
+        </div>
+        <div class="divider"></div>
+        <div class="section-label">الادوار و اللاعبين</div>
+        <div class="roles-list" id="roles-list"></div>
+        <div id="roles-empty" class="empty-state" style="display:none">لا يوجد ادوار اضف المزيد ☝️</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div>
+      <div class="section-label" style="margin:0 0 2px">اللاعبون</div>
+      <span class="val" id="sum-players">0</span>
+    </div>
+    <div style="text-align:center">
+      <div class="section-label" style="margin:0 0 2px">الادوار</div>
+      <span class="val" id="sum-slots">0</span>
+      <span id="sum-warn" style="display:none;font-size:11px;color:var(--danger);display:block">⚠️ mismatch</span>
+    </div>
+    <div style="text-align:right">
+      <div class="section-label" style="margin:0 0 2px">عدد الادوار</div>
+      <span class="val" id="sum-roles">0</span>
+    </div>
+  </div>
+
+  <button class="big-btn" id="start-btn" onclick="startDistribution()">⚔️ &nbsp; توزيع الادوار</button>
+</div>
+
+<div id="screen-admin" class="screen">
+  <div class="game-header">
+    <div class="game-title" style="color: var(--purple);">توزيع يدوي</div>
+    <span class="ornament">⸻ 🔮 ⸻</span>
+    <div class="game-subtitle">تعيين الأدوار يدوياً</div>
+  </div>
+
+  <div class="scroll-area" style="padding: 0 20px;">
+    <div class="section-label">قائمة اللاعبين وتعيين الأدوار</div>
+    <div id="admin-players-list">
+      </div>
+    <div id="admin-empty" class="empty-state" style="display:none">قم بإضافة لاعبين أولاً لتعديل أدوارهم.</div>
+  </div>
+
+  <button class="big-btn" style="background: var(--purple); color: white; margin-bottom: 20px;" onclick="saveAdminAssignments()">
+    💾 &nbsp; حفظ وإغلاق التعديل
+  </button>
+</div>
+
+<div id="screen-narrator" class="screen">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px;">
+    <div class="narrator-card">
+      <span class="narrator-emoji">🎙️</span>
+      <div class="narrator-title">Next Player</div>
+      <div class="narrator-name" id="narrator-player-name">—</div>
+
+      <div class="progress-dots" id="progress-dots"></div>
+
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:28px;font-style:italic;">
+        اعط الهاتف لهذا اللاعب.
+      </div>
+
+      <button class="big-btn" style="margin:0;width:100%" onclick="showRoleToPlayer()">
+        👁️ &nbsp; كشف دوري
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-reveal" class="screen">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;width:100%">
+
+    <div id="reveal-hidden" style="width:100%;max-width:360px;">
+      <div class="tap-to-reveal pulse" onclick="showRole()">
+        <div style="font-size:48px;margin-bottom:12px">🙈</div>
+        <div class="tap-to-reveal-text">اضغط لكشف الدور</div>
+      </div>
+      <div style="font-size:13px;color:var(--text-muted);text-align:center;font-style:italic;margin-top:12px">
+        تاكد ان لا احد ينظر 👀
+      </div>
+    </div>
+
+    <div id="reveal-shown" class="role-hidden" style="width:100%;max-width:360px;">
+      <div class="reveal-card">
+        <span class="reveal-role-icon" id="reveal-icon">🎭</span>
+        <div class="reveal-label">دورك هو:</div>
+        <div class="reveal-role-name" id="reveal-role-name">—</div>
+        <div class="reveal-player-name" id="reveal-player-name">—</div>
+        <button class="big-btn" style="margin:0;width:100%" onclick="nextPlayer()">
+          ✅ &nbsp; Done
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="screen-done" class="screen">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px;">
+    <div class="done-card">
+      <span class="done-icon">🎉</span>
+      <div class="done-title">كل الادوار موزعة</div>
+      <div style="color:var(--text-muted);font-size:15px;font-style:italic;margin-bottom:32px;">
+        NADIR ABDULLAH MOATACEM
+      </div>
+      <button class="big-btn" style="margin:0 0 14px;width:100%" onclick="restartSameGame()">
+        🔄 &nbsp; اللعب مجددا بنفس الاعدادات
+      </button>
+      <button class="outline-btn" style="margin:0;width:100%" onclick="goToSetup()">
+        ⚙️ &nbsp; اعدادات جديدة
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ============ CONFIGURATION ============
 const ADMIN_PASSWORD = "je passe"; // <-- Change this to your preferred password
